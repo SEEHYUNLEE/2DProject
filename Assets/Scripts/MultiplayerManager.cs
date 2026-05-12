@@ -13,15 +13,24 @@ using UnityEngine.UI;
 
 public class MultiplayerManager : MonoBehaviour
 {
+    public static MultiplayerManager Instance;
+
     [SerializeField] Button hostButton;
     [SerializeField] Button clientButton;
     [SerializeField] TMP_InputField codeInput;
     [SerializeField] TMP_Text displayCodeText;
+    [SerializeField] Button spawnWarriorButton;
 
     [SerializeField] int maxPlayers = 2; // 최대 인원 설정
+    [SerializeField] GameObject unitPrefab;
+
+    public Transform teamASpawnPoint;
+    public Transform teamBSpawnPoint;
 
     async void Awake()
     {
+        if (Instance == null) { Instance = this; }
+
         await UnityServices.InitializeAsync();
 
         if (!AuthenticationService.Instance.IsSignedIn)
@@ -35,11 +44,25 @@ public class MultiplayerManager : MonoBehaviour
         hostButton.onClick.AddListener(CreateRoom);
         clientButton.onClick.AddListener(JoinRoom);
 
-        // [서버 전용] 접속 승인 함수 등록
-        NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
+        spawnWarriorButton.onClick.AddListener(OnSpawnButtonClicked);
 
-        // [클라이언트 전용] 연결 해제(차단 포함) 시 실행될 함수 등록
-        NetworkManager.Singleton.OnClientDisconnectCallback += OnDisconnect;
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
+        }
+    }
+
+    public void OnSpawnButtonClicked()
+    {
+        // 씬에 있는 내 Player 오브젝트를 찾아서 ServerRpc 실행
+        if (NetworkManager.Singleton.LocalClient != null && NetworkManager.Singleton.LocalClient.PlayerObject != null)
+        {
+            var myPlayer = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Player>();
+            if (myPlayer != null)
+            {
+                myPlayer.RequestSpawn();
+            }
+        }
     }
 
     // 1. 서버(호스트)가 접속 인원을 체크하는 로직
@@ -55,7 +78,7 @@ public class MultiplayerManager : MonoBehaviour
         {
             // 🔥 이 메시지가 클라이언트에게 전달됩니다.
             response.Reason = "방이 가득 찼습니다.";
-            UnityEngine.Debug.LogWarning("인원 초과로 새로운 플레이어 접속을 거절했습니다.");
+            //UnityEngine.Debug.LogWarning("인원 초과로 새로운 플레이어 접속을 거절했습니다.");
         }
     }
 
@@ -125,6 +148,30 @@ public class MultiplayerManager : MonoBehaviour
         catch (Exception e)
         {
             UnityEngine.Debug.LogError($"참가 에러: {e.Message}");
+        }
+    }
+
+    public void SpawnUnit(ulong clientId)
+    {
+        if (!NetworkManager.Singleton.IsServer) return;
+
+        int team = (clientId == 0) ? 1 : 2;
+        float moveDir = (team == 1) ? 1f : -1f;
+        Transform selectedPoint = (team == 1) ? teamASpawnPoint : teamBSpawnPoint;
+
+        GameObject unit = Instantiate(unitPrefab, selectedPoint.position, Quaternion.identity);
+        //unit.transform.localScale = unitPrefab.transform.localScale;
+        var networkObj = unit.GetComponent<NetworkObject>();
+        if (networkObj != null)
+        {
+            networkObj.Spawn();
+        }
+
+        var warrior = unit.GetComponent<Warrior>();
+        if (warrior != null)
+        {
+            warrior.teamIndex.Value = team;
+            warrior.direction.Value = (int)moveDir;
         }
     }
 }
