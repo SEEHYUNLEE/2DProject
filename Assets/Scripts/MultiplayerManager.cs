@@ -10,26 +10,39 @@ using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class MultiplayerManager : MonoBehaviour
 {
     public static MultiplayerManager Instance;
+
+    [SerializeField] GameObject mainMenuPanel;
+    [SerializeField] GameObject lobbyPanel;
 
     [SerializeField] Button hostButton;
     [SerializeField] Button clientButton;
     [SerializeField] TMP_InputField codeInput;
     [SerializeField] TMP_Text displayCodeText;
     [SerializeField] Button spawnWarriorButton;
+    [SerializeField] Button backToMenuButton;
 
     [SerializeField] int maxPlayers = 2; // 최대 인원 설정
     [SerializeField] GameObject unitPrefab;
+    [SerializeField] string gameSceneName = "GameScene";
 
     public Transform teamASpawnPoint;
     public Transform teamBSpawnPoint;
 
     async void Awake()
     {
-        if (Instance == null) { Instance = this; }
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+        //if (Instance == null) { Instance = this; }
 
         await UnityServices.InitializeAsync();
 
@@ -44,11 +57,43 @@ public class MultiplayerManager : MonoBehaviour
         hostButton.onClick.AddListener(CreateRoom);
         clientButton.onClick.AddListener(JoinRoom);
 
-        spawnWarriorButton.onClick.AddListener(OnSpawnButtonClicked);
+        //spawnWarriorButton.onClick.AddListener(OnSpawnButtonClicked);
+
+        backToMenuButton.onClick.AddListener(LeaveLobby);
+
+        if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
+        if (lobbyPanel != null) lobbyPanel.SetActive(false);
 
         if (NetworkManager.Singleton != null)
         {
             NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
+            NetworkManager.Singleton.OnClientDisconnectCallback += OnDisconnect;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        // 메모리 누수 방지를 위한 이벤트 해제
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.OnClientDisconnectCallback -= OnDisconnect;
+        }
+    }
+
+    private void OnClientConnected(ulong clientId)
+    {
+        if (!NetworkManager.Singleton.IsServer) return;
+
+        // 호스트 포함 현재 접속된 클라이언트 수가 maxPlayers(2명)에 도달하면
+        if (NetworkManager.Singleton.ConnectedClientsList.Count == maxPlayers)
+        {
+            UnityEngine.Debug.Log("모든 플레이어가 접속했습니다. 게임 씬으로 이동합니다.");
+
+            // 씬 전환이 일어날 때 이 콜백이 계속 남아 방해하지 않도록 해제해 줍니다.
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+
+            // ★ 중요: Netcode 전용 SceneManager를 이용해 호스트+클라이언트 전원을 이동시킵니다.
+            NetworkManager.Singleton.SceneManager.LoadScene(gameSceneName, UnityEngine.SceneManagement.LoadSceneMode.Single);
         }
     }
 
@@ -117,15 +162,49 @@ public class MultiplayerManager : MonoBehaviour
             var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
             transport.SetRelayServerData(AllocationUtils.ToRelayServerData(alloc, "dtls"));
 
+            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+
             NetworkManager.Singleton.StartHost();
 
-            UnityEngine.Debug.Log($"방 생성 완료! 코드: {joinCode}");
+            //UnityEngine.Debug.Log($"방 생성 완료! 코드: {joinCode}");
             // 화면에 코드를 표시하고 싶다면 여기서 joinCode를 UI에 띄워주세요.
+
+            if (mainMenuPanel != null) mainMenuPanel.SetActive(false);
+            if (lobbyPanel != null) lobbyPanel.SetActive(true);
         }
         catch (Exception e)
         {
             UnityEngine.Debug.LogError($"방 생성 에러: {e.Message}");
         }
+    }
+
+    void LeaveLobby()
+    {
+        UnityEngine.Debug.Log("로비를 취소하고 메인 메뉴로 돌아갑니다.");
+
+        if (NetworkManager.Singleton != null)
+        {
+            // 1. 내가 호스트였다면, 연결된 다른 사람들을 모두 끊어버립니다.
+            if (NetworkManager.Singleton.IsServer)
+            {
+                // 호스트가 나가면 방 자체가 완전히 폭파되도록 셔트다운을 먼저 합니다.
+                NetworkManager.Singleton.Shutdown();
+            }
+            else
+            {
+                // 일반 클라이언트라면 그냥 나만 나갑니다.
+                NetworkManager.Singleton.Shutdown();
+            }
+
+            // 2. 이벤트 구독 해제
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+        }
+
+        if (lobbyPanel != null) lobbyPanel.SetActive(false);
+        if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
+
+        //displayCodeText.text = "Waiting for Code...";
+        //codeInput.text = "";
     }
 
     async void JoinRoom()
@@ -143,7 +222,9 @@ public class MultiplayerManager : MonoBehaviour
             transport.SetRelayServerData(AllocationUtils.ToRelayServerData(joinAlloc, "dtls"));
 
             NetworkManager.Singleton.StartClient();
-            UnityEngine.Debug.Log("서버 접속 성공");
+            UnityEngine.Debug.Log("서버 접속 시도 중");
+
+            StartCoroutine(CheckGhostRoomTimeout());
         }
         catch (Exception e)
         {
@@ -151,16 +232,53 @@ public class MultiplayerManager : MonoBehaviour
         }
     }
 
+    private IEnumerator CheckGhostRoomTimeout()
+    {
+        // 패널 전환 (로비 창으로 일단 진입)
+        if (mainMenuPanel != null) mainMenuPanel.SetActive(false);
+        if (lobbyPanel != null) lobbyPanel.SetActive(true);
+        if (displayCodeText != null) displayCodeText.text = "Loading...";
+
+        // 3초 동안 호스트가 응답해서 나를 완전히 연결해 주는지 기다립니다.
+        yield return new WaitForSeconds(3.0f);
+
+        // 3초가 지났는데도 나(클라이언트)가 서버와 '진짜 연결' 상태가 아니라면 유령방입니다!
+        if (NetworkManager.Singleton != null && !NetworkManager.Singleton.IsConnectedClient)
+        {
+            UnityEngine.Debug.LogError("🚨 [유령 방 발견] 호스트가 존재하지 않습니다! 강제 퇴장 처리합니다.");
+
+            // 넷코드 클라이언트 종료
+            NetworkManager.Singleton.Shutdown();
+
+            // UI 메인메뉴로 원상복구
+            if (lobbyPanel != null) lobbyPanel.SetActive(false);
+            if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
+        }
+    }
+
     public void SpawnUnit(ulong clientId)
     {
         if (!NetworkManager.Singleton.IsServer) return;
+
+        if (teamASpawnPoint == null || teamBSpawnPoint == null)
+        {
+            UnityEngine.Debug.Log("⚠️ 스폰 포인트가 비어있어 실시간으로 재연동을 시도합니다.");
+
+            GameObject spawnPointA = GameObject.Find("SpawnPointA");
+            GameObject spawnPointB = GameObject.Find("SpawnPointB");
+
+            if (spawnPointA != null) teamASpawnPoint = spawnPointA.transform;
+            if (spawnPointB != null) teamBSpawnPoint = spawnPointB.transform;
+        }
 
         int team = (clientId == 0) ? 1 : 2;
         float moveDir = (team == 1) ? 1f : -1f;
         Transform selectedPoint = (team == 1) ? teamASpawnPoint : teamBSpawnPoint;
 
-        GameObject unit = Instantiate(unitPrefab, selectedPoint.position, Quaternion.identity);
-        //unit.transform.localScale = unitPrefab.transform.localScale;
+        float yOffset = 0.1f;
+        Vector3 spawnPosition = new Vector3(selectedPoint.position.x, selectedPoint.position.y - yOffset, selectedPoint.position.z);
+        GameObject unit = Instantiate(unitPrefab, spawnPosition, Quaternion.identity);
+
         var networkObj = unit.GetComponent<NetworkObject>();
         if (networkObj != null)
         {

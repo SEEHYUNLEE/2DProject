@@ -1,19 +1,19 @@
-using System.Diagnostics;
+ï»¿using System.Diagnostics;
 using Unity.Netcode;
 using UnityEngine;
 
 public class Player : NetworkBehaviour
 {
-    // 1: AÆÀ(È£½ºÆ®), 2: BÆÀ(Å¬¶óÀÌ¾ğÆ®)
+    // 1: AíŒ€(í˜¸ìŠ¤íŠ¸), 2: BíŒ€(í´ë¼ì´ì–¸íŠ¸)
     public NetworkVariable<int> teamIndex = new NetworkVariable<int>(0,
         NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     public override void OnNetworkSpawn()
     {
-        // ³» ·ÎÄÃ ÇÃ·¹ÀÌ¾î ¿ÀºêÁ§Æ®°¡ »ı¼ºµÇ¾úÀ» ¶§¸¸ ½ÇÇà
+        // ë‚´ ë¡œì»¬ í”Œë ˆì´ì–´ ì˜¤ë¸Œì íŠ¸ê°€ ìƒì„±ë˜ì—ˆì„ ë•Œë§Œ ì‹¤í–‰
         if (IsOwner)
         {
-            // ¼­¹ö¿¡ ³»°¡ Á¢¼ÓÇßÀ½À» ¾Ë¸®°í ÆÀ ¹èÁ¤À» ¿äÃ»
+            // ì„œë²„ì— ë‚´ê°€ ì ‘ì†í–ˆìŒì„ ì•Œë¦¬ê³  íŒ€ ë°°ì •ì„ ìš”ì²­
             RequestAssignTeamServerRpc();
         }
     }
@@ -22,18 +22,37 @@ public class Player : NetworkBehaviour
     private void RequestAssignTeamServerRpc(ServerRpcParams rpcParams = default)
     {
         ulong clientId = rpcParams.Receive.SenderClientId;
-        // È£½ºÆ®´Â 1ÆÀ, ³ª¸ÓÁö´Â 2ÆÀ
+        // í˜¸ìŠ¤íŠ¸ëŠ” 1íŒ€, ë‚˜ë¨¸ì§€ëŠ” 2íŒ€
         teamIndex.Value = (clientId == 0) ? 1 : 2;
-        UnityEngine.Debug.Log($"[¼­¹ö] ÇÃ·¹ÀÌ¾î {clientId} ÆÀ ¹èÁ¤ ¿Ï·á: {teamIndex.Value}");
+        UnityEngine.Debug.Log($"[ì„œë²„] í”Œë ˆì´ì–´ {clientId} íŒ€ ë°°ì • ì™„ë£Œ: {teamIndex.Value}");
     }
 
     public void RequestSpawn()
     {
-        if (IsOwner && teamIndex.Value != 0) // ÆÀÀÌ Á¤ÇØÁø ÈÄ¿¡¸¸ ¼ÒÈ¯ °¡´É
+        UnityEngine.Debug.Log($"5. RequestSpawn ì§„ì… - IsOwner: {IsOwner}, í˜„ì¬ ë‚´ íŒ€: {teamIndex.Value}");
+
+        if (IsOwner)
         {
-            SpawnUnitServerRpc();
+            if (teamIndex.Value != 0)
+            {
+                UnityEngine.Debug.Log("6. ëª¨ë“  ì¡°ê±´ ë§Œì¡±! SpawnUnitServerRpcë¥¼ ë‚ ë¦½ë‹ˆë‹¤.");
+                SpawnUnitServerRpc();
+            }
+            else
+            {
+                // ğŸš¨ ë§Œì•½ ì½˜ì†”ì°½ì— ì´ ë¡œê·¸ê°€ ì°íŒë‹¤ë©´ íŒ€ ë°°ì •ì´ ì•„ì§ ë‚´ í™”ë©´ì— ì ìš© ì•ˆ ëœ ê²ƒì…ë‹ˆë‹¤!
+                UnityEngine.Debug.LogError("ğŸš¨ [ìƒì„± ì‹¤íŒ¨] ì•„ì§ ì„œë²„ë¡œë¶€í„° íŒ€ ë°°ì •ì„ ì „ë‹¬ë°›ì§€ ëª»í–ˆìŠµë‹ˆë‹¤. ì ì‹œ í›„ ë‹¤ì‹œ ëˆŒëŸ¬ë³´ì„¸ìš”!");
+            }
         }
     }
+
+    //public void RequestSpawn()
+    //{
+    //    if (IsOwner && teamIndex.Value != 0) // íŒ€ì´ ì •í•´ì§„ í›„ì—ë§Œ ì†Œí™˜ ê°€ëŠ¥
+    //    {
+    //        SpawnUnitServerRpc();
+    //    }
+    //}
 
     [ServerRpc]
     private void SpawnUnitServerRpc(ServerRpcParams rpcParams = default)
