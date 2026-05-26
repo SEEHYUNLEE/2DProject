@@ -33,6 +33,8 @@ public class MultiplayerManager : MonoBehaviour
     public Transform teamASpawnPoint;
     public Transform teamBSpawnPoint;
 
+    bool isRejected = false;
+
     async void Awake()
     {
         if (Instance != null && Instance != this)
@@ -121,9 +123,7 @@ public class MultiplayerManager : MonoBehaviour
 
         if (!approve)
         {
-            // 🔥 이 메시지가 클라이언트에게 전달됩니다.
             response.Reason = "방이 가득 찼습니다.";
-            //UnityEngine.Debug.LogWarning("인원 초과로 새로운 플레이어 접속을 거절했습니다.");
         }
     }
 
@@ -140,10 +140,21 @@ public class MultiplayerManager : MonoBehaviour
             {
                 // 여기서 클라이언트의 디버그 창에 빨간색으로 사유가 뜹니다.
                 UnityEngine.Debug.LogError($"[접속 실패 사유]: {reason}");
+
+                isRejected = true;
+
+                if (displayCodeText != null)
+                {
+                    displayCodeText.text = "The room is full"; // "방이 가득 찼습니다."가 화면에 표시됨
+                }
+
             }
             else
             {
                 UnityEngine.Debug.Log("서버와의 연결이 끊겼습니다.");
+
+                if (lobbyPanel != null) lobbyPanel.SetActive(false);
+                if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
             }
         }
     }
@@ -153,7 +164,7 @@ public class MultiplayerManager : MonoBehaviour
         try
         {
             // 릴레이 서버 할당 (2인용)
-            Allocation alloc = await RelayService.Instance.CreateAllocationAsync(2);
+            Allocation alloc = await RelayService.Instance.CreateAllocationAsync(maxPlayers-1);
             string joinCode = await RelayService.Instance.GetJoinCodeAsync(alloc.AllocationId);
 
             displayCodeText.text = joinCode;
@@ -184,27 +195,17 @@ public class MultiplayerManager : MonoBehaviour
 
         if (NetworkManager.Singleton != null)
         {
-            // 1. 내가 호스트였다면, 연결된 다른 사람들을 모두 끊어버립니다.
-            if (NetworkManager.Singleton.IsServer)
-            {
-                // 호스트가 나가면 방 자체가 완전히 폭파되도록 셔트다운을 먼저 합니다.
-                NetworkManager.Singleton.Shutdown();
-            }
-            else
-            {
-                // 일반 클라이언트라면 그냥 나만 나갑니다.
-                NetworkManager.Singleton.Shutdown();
-            }
-
-            // 2. 이벤트 구독 해제
+            // ★ [순서 변경] 넷코드를 끄기 전에 이벤트를 '먼저' 안전하게 해제합니다.
             NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+
+            // 호스트든 클라이언트든 방을 나갈 때는 Shutdown() 하나로 처리가 가능합니다.
+            // 호스트가 Shutdown하면 방이 터지고, 클라이언트가 하면 본인만 연결이 끊깁니다.
+            NetworkManager.Singleton.Shutdown();
         }
 
         if (lobbyPanel != null) lobbyPanel.SetActive(false);
         if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
-
-        //displayCodeText.text = "Waiting for Code...";
-        //codeInput.text = "";
+        if (codeInput != null) codeInput.text = "";
     }
 
     async void JoinRoom()
@@ -213,6 +214,13 @@ public class MultiplayerManager : MonoBehaviour
         {
             string code = codeInput.text;
             if (string.IsNullOrEmpty(code)) return;
+
+            isRejected = false;
+
+            // 패널 전환 (로비 창으로 일단 진입)
+            if (mainMenuPanel != null) mainMenuPanel.SetActive(false);
+            if (lobbyPanel != null) lobbyPanel.SetActive(true);
+            if (displayCodeText != null) displayCodeText.text = "Loading...";
 
             // 릴레이 참가 정보 가져오기
             var joinAlloc = await RelayService.Instance.JoinAllocationAsync(code);
@@ -229,18 +237,19 @@ public class MultiplayerManager : MonoBehaviour
         catch (Exception e)
         {
             UnityEngine.Debug.LogError($"참가 에러: {e.Message}");
+            if (displayCodeText != null)
+            {
+                displayCodeText.text = "Code Not Found";
+            }
         }
     }
 
     private IEnumerator CheckGhostRoomTimeout()
     {
-        // 패널 전환 (로비 창으로 일단 진입)
-        if (mainMenuPanel != null) mainMenuPanel.SetActive(false);
-        if (lobbyPanel != null) lobbyPanel.SetActive(true);
-        if (displayCodeText != null) displayCodeText.text = "Loading...";
-
         // 3초 동안 호스트가 응답해서 나를 완전히 연결해 주는지 기다립니다.
         yield return new WaitForSeconds(3.0f);
+
+        if (isRejected) yield break;
 
         // 3초가 지났는데도 나(클라이언트)가 서버와 '진짜 연결' 상태가 아니라면 유령방입니다!
         if (NetworkManager.Singleton != null && !NetworkManager.Singleton.IsConnectedClient)
