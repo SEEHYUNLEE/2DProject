@@ -1,62 +1,164 @@
-﻿using System.Diagnostics;
+﻿using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
+using TMPro;
+using UnityEngine.SceneManagement;
+
+public enum UnitType
+{
+    Warrior,
+    Archer,
+    Random
+}
 
 public class Player : NetworkBehaviour
 {
-    // 1: A팀(호스트), 2: B팀(클라이언트)
     public NetworkVariable<int> teamIndex = new NetworkVariable<int>(0,
         NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
+    public NetworkVariable<int> coin = new NetworkVariable<int>(0,
+        NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    private TMP_Text coinText;
+
     public override void OnNetworkSpawn()
     {
-        // 내 로컬 플레이어 오브젝트가 생성되었을 때만 실행
+        // 코인 값 변경 이벤트 등록 (모든 클라이언트가 들음)
+        coin.OnValueChanged += OnCoinChanged;
+
         if (IsOwner)
         {
-            // 서버에 내가 접속했음을 알리고 팀 배정을 요청
             RequestAssignTeamServerRpc();
+
+            // 씬 전환 직후 텍스트 컴포넌트 바로 찾아두기
+            FindCoinTextObject();
+            UpdateCoinUI(coin.Value);
         }
+
+        if (IsServer)
+        {
+            StartCoroutine(GiveCoinEverySecond());
+        }
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        coin.OnValueChanged -= OnCoinChanged;
+    }
+
+    private IEnumerator GiveCoinEverySecond()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(1.0f);
+
+            if (SceneManager.GetActiveScene().name == "GameScene")
+            {
+                coin.Value += 50; // 1초에 50G씩 증가
+            }
+        }
+    }
+
+    // 씬에서 코인 텍스트 오브젝트를 찾는 별도 메서드 (실패 대비용)
+    private void FindCoinTextObject()
+    {
+        if (coinText != null) return;
+
+        GameObject textObj = GameObject.Find("CoinText");
+        if (textObj != null)
+        {
+            coinText = textObj.GetComponent<TMP_Text>();
+        }
+    }
+
+    private void OnCoinChanged(int previousValue, int newValue)
+    {
+        // 내 캐릭터의 코인이 바뀐 경우에만 UI 업데이트
+        if (IsOwner)
+        {
+            UpdateCoinUI(newValue);
+        }
+    }
+
+    private void UpdateCoinUI(int currentCoin)
+    {
+        // 혹시 Start 시점에 못 찾았다면 갱신할 때 다시 한번 찾음
+        if (coinText == null)
+        {
+            FindCoinTextObject();
+        }
+
+        if (coinText != null)
+        {
+            coinText.text = $"{currentCoin}G";
+        }
+    }
+
+    public bool CanAfford(int amount)
+    {
+        return coin.Value >= amount;
+    }
+
+    public bool ConsumeCoin(int amount)
+    {
+        if (!IsServer) return false;
+
+        if (coin.Value >= amount)
+        {
+            coin.Value -= amount;
+            return true;
+        }
+        return false;
+    }
+
+    // --- [중요] 소환 요청 및 검증 흐름 ---
+    public void RequestSpawn(UnitType type)
+    {
+        if (MultiplayerManager.Instance != null && MultiplayerManager.Instance.isGameOver) return;
+
+        if (!IsOwner || teamIndex.Value == 0) return;
+
+        int cost = GetUnitCost(type);
+
+        if (CanAfford(cost))
+        {
+            SpawnUnitServerRpc(type);
+        }
+    }
+
+    [ServerRpc]
+    private void SpawnUnitServerRpc(UnitType type, ServerRpcParams rpcParams = default)
+    {
+        int cost = GetUnitCost(type);
+
+        // [치트 방지] 서버에서 최종 돈 차감 검증
+        if (ConsumeCoin(cost))
+        {
+            UnitType finalSpawnType = type;
+            if (type == UnitType.Random)
+            {
+                finalSpawnType = (UnityEngine.Random.Range(0, 2) == 0) ? UnitType.Warrior : UnitType.Archer;
+            }
+
+            MultiplayerManager.Instance.SpawnUnit(rpcParams.Receive.SenderClientId, finalSpawnType);
+        }
+    }
+
+    private int GetUnitCost(UnitType type)
+    {
+        return type switch
+        {
+            UnitType.Warrior => 100,
+            UnitType.Archer => 150,
+            UnitType.Random => 300,
+            _ => 0
+        };
     }
 
     [ServerRpc]
     private void RequestAssignTeamServerRpc(ServerRpcParams rpcParams = default)
     {
         ulong clientId = rpcParams.Receive.SenderClientId;
-        // 호스트는 1팀, 나머지는 2팀
         teamIndex.Value = (clientId == 0) ? 1 : 2;
-        UnityEngine.Debug.Log($"[서버] 플레이어 {clientId} 팀 배정 완료: {teamIndex.Value}");
-    }
-
-    public void RequestSpawn()
-    {
-        UnityEngine.Debug.Log($"5. RequestSpawn 진입 - IsOwner: {IsOwner}, 현재 내 팀: {teamIndex.Value}");
-
-        if (IsOwner)
-        {
-            if (teamIndex.Value != 0)
-            {
-                UnityEngine.Debug.Log("6. 모든 조건 만족! SpawnUnitServerRpc를 날립니다.");
-                SpawnUnitServerRpc();
-            }
-            else
-            {
-                // 🚨 만약 콘솔창에 이 로그가 찍힌다면 팀 배정이 아직 내 화면에 적용 안 된 것입니다!
-                UnityEngine.Debug.LogError("🚨 [생성 실패] 아직 서버로부터 팀 배정을 전달받지 못했습니다. 잠시 후 다시 눌러보세요!");
-            }
-        }
-    }
-
-    //public void RequestSpawn()
-    //{
-    //    if (IsOwner && teamIndex.Value != 0) // 팀이 정해진 후에만 소환 가능
-    //    {
-    //        SpawnUnitServerRpc();
-    //    }
-    //}
-
-    [ServerRpc]
-    private void SpawnUnitServerRpc(ServerRpcParams rpcParams = default)
-    {
-        MultiplayerManager.Instance.SpawnUnit(rpcParams.Receive.SenderClientId);
     }
 }

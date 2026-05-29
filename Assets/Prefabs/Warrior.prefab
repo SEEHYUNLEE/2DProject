@@ -228,6 +228,9 @@ MonoBehaviour:
   unitLayer:
     serializedVersion: 2
     m_Bits: 128
+  baseLayer:
+    serializedVersion: 2
+    m_Bits: 256
   teamIndex:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0

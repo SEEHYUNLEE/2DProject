@@ -24,16 +24,22 @@ public class MultiplayerManager : MonoBehaviour
     [SerializeField] TMP_InputField codeInput;
     [SerializeField] TMP_Text displayCodeText;
     [SerializeField] Button spawnWarriorButton;
+    [SerializeField] Button spawnArcherButton;
+    [SerializeField] Button spawnRandomButton;
     [SerializeField] Button backToMenuButton;
 
+    [SerializeField] GameObject warriorPrefab;  // 기존 unitPrefab의 이름을 알아보기 쉽게 변경 권장
+    [SerializeField] GameObject archerPrefab;
+
     [SerializeField] int maxPlayers = 2; // 최대 인원 설정
-    [SerializeField] GameObject unitPrefab;
     [SerializeField] string gameSceneName = "GameScene";
 
     public Transform teamASpawnPoint;
     public Transform teamBSpawnPoint;
 
     bool isRejected = false;
+
+    public bool isGameOver { get; private set; } = false;
 
     async void Awake()
     {
@@ -62,6 +68,10 @@ public class MultiplayerManager : MonoBehaviour
         //spawnWarriorButton.onClick.AddListener(OnSpawnButtonClicked);
 
         backToMenuButton.onClick.AddListener(LeaveLobby);
+
+        if (spawnWarriorButton != null) spawnWarriorButton.onClick.AddListener(() => OnSpawnButtonClicked(UnitType.Warrior));
+        if (spawnArcherButton != null) spawnArcherButton.onClick.AddListener(() => OnSpawnButtonClicked(UnitType.Archer));
+        if (spawnRandomButton != null) spawnRandomButton.onClick.AddListener(() => OnSpawnButtonClicked(UnitType.Random));
 
         if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
         if (lobbyPanel != null) lobbyPanel.SetActive(false);
@@ -99,15 +109,15 @@ public class MultiplayerManager : MonoBehaviour
         }
     }
 
-    public void OnSpawnButtonClicked()
+    public void OnSpawnButtonClicked(UnitType type)
     {
-        // 씬에 있는 내 Player 오브젝트를 찾아서 ServerRpc 실행
         if (NetworkManager.Singleton.LocalClient != null && NetworkManager.Singleton.LocalClient.PlayerObject != null)
         {
             var myPlayer = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Player>();
             if (myPlayer != null)
             {
-                myPlayer.RequestSpawn();
+                // 플레이어에게 어떤 유닛을 뽑을지 요청
+                myPlayer.RequestSpawn(type);
             }
         }
     }
@@ -164,7 +174,7 @@ public class MultiplayerManager : MonoBehaviour
         try
         {
             // 릴레이 서버 할당 (2인용)
-            Allocation alloc = await RelayService.Instance.CreateAllocationAsync(maxPlayers-1);
+            Allocation alloc = await RelayService.Instance.CreateAllocationAsync(maxPlayers - 1);
             string joinCode = await RelayService.Instance.GetJoinCodeAsync(alloc.AllocationId);
 
             displayCodeText.text = joinCode;
@@ -265,17 +275,15 @@ public class MultiplayerManager : MonoBehaviour
         }
     }
 
-    public void SpawnUnit(ulong clientId)
+    public void SpawnUnit(ulong clientId, UnitType type)
     {
         if (!NetworkManager.Singleton.IsServer) return;
 
+        // 1. 팀 및 방향 설정 (기존 코드 유지)
         if (teamASpawnPoint == null || teamBSpawnPoint == null)
         {
-            UnityEngine.Debug.Log("⚠️ 스폰 포인트가 비어있어 실시간으로 재연동을 시도합니다.");
-
             GameObject spawnPointA = GameObject.Find("SpawnPointA");
             GameObject spawnPointB = GameObject.Find("SpawnPointB");
-
             if (spawnPointA != null) teamASpawnPoint = spawnPointA.transform;
             if (spawnPointB != null) teamBSpawnPoint = spawnPointB.transform;
         }
@@ -284,9 +292,14 @@ public class MultiplayerManager : MonoBehaviour
         float moveDir = (team == 1) ? 1f : -1f;
         Transform selectedPoint = (team == 1) ? teamASpawnPoint : teamBSpawnPoint;
 
+        // 2. [추가] 타입에 따른 프리팹 선택 (랜덤의 경우 서버에서 최종 결정된 유닛이 들어옴)
+        GameObject prefabToSpawn = (type == UnitType.Archer) ? archerPrefab : warriorPrefab;
+
         float yOffset = 0.1f;
         Vector3 spawnPosition = new Vector3(selectedPoint.position.x, selectedPoint.position.y - yOffset, selectedPoint.position.z);
-        GameObject unit = Instantiate(unitPrefab, spawnPosition, Quaternion.identity);
+
+        // 선택된 프리팹으로 생성
+        GameObject unit = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
 
         var networkObj = unit.GetComponent<NetworkObject>();
         if (networkObj != null)
@@ -294,11 +307,44 @@ public class MultiplayerManager : MonoBehaviour
             networkObj.Spawn();
         }
 
+        // Warrior 스크립트(또는 공통 Unit 스크립트) 컴포넌트 제어
+        // (궁수와 전사가 같은 베이스 컴포넌트를 쓴다고 가정하거나 각각 겟컴포넌트 하셔야 합니다)
         var warrior = unit.GetComponent<Warrior>();
         if (warrior != null)
         {
             warrior.teamIndex.Value = team;
             warrior.direction.Value = (int)moveDir;
         }
+    }
+
+    public void OnBaseDestroyed(int failedTeamIndex)
+    {
+        if (!NetworkManager.Singleton.IsServer) return;
+
+        // 이미 게임오버 처리가 되었다면 중복 실행 방지
+        if (isGameOver) return;
+
+        int winnerTeam = (failedTeamIndex == 1) ? 2 : 1;
+        UnityEngine.Debug.Log($"🚨 [서버] {failedTeamIndex}팀 기지 파괴! 승자: {winnerTeam}팀. 게임을 정지합니다.");
+
+        // 모든 클라이언트에게 게임을 멈추라고 명령
+        StopGameClientRpc(winnerTeam);
+    }
+
+    [ClientRpc]
+    private void StopGameClientRpc(int winnerTeam)
+    {
+        isGameOver = true;
+
+        // 1. 유니티 물리 및 시간축 정지 (이동, 애니메이션 등 일시정지)
+        Time.timeScale = 0f;
+
+        // 2. UI 텍스트나 알림창을 띄우고 싶다면 여기에 작성하세요.
+        if (displayCodeText != null)
+        {
+            displayCodeText.text = $"GAME OVER\nWinner: Team {winnerTeam}";
+        }
+
+        UnityEngine.Debug.Log($"[클라이언트] 게임 정지 완료. 승리팀: {winnerTeam}");
     }
 }

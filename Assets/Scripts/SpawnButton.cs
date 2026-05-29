@@ -1,23 +1,30 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 
 public class SpawnButton : MonoBehaviour
 {
+    // ğŸŸ¢ ìœ ë‹ˆí‹° ì¸ìŠ¤í™í„° ì°½ì—ì„œ ì´ ë²„íŠ¼ì´ ì–´ë–¤ ìœ ë‹›ì„ ì†Œí™˜í• ì§€ ì„ íƒí•  ìˆ˜ ìˆê²Œ í•©ë‹ˆë‹¤.
+    [SerializeField] private UnitType unitType;
+
     void Start()
     {
-        // 1. ÀÌ ¹öÆ° ÄÄÆ÷³ÍÆ®¸¦ °¡Á®¿É´Ï´Ù.
+        // 1. ì´ ë²„íŠ¼ ì»´í¬ë„ŒíŠ¸ë¥¼ ê°€ì ¸ì˜µë‹ˆë‹¤.
         Button btn = GetComponent<Button>();
 
         if (btn != null)
         {
-            // 2. UI ¾À¿¡¼­ »ì¾Æ¼­ °Ç³Ê¿Â ¸ÖÆ¼ÇÃ·¹ÀÌ¾î ¸Å´ÏÀúÀÇ ÇÔ¼ö¸¦ 
-            // Å¬¸¯ ÀÌº¥Æ®·Î ÀÚµ¿À¸·Î ¿¬°áÇØ Áİ´Ï´Ù!
+            // 2. í´ë¦­ ì´ë²¤íŠ¸ ì—°ê²° (ë‚´ê°€ ì„¤ì •í•œ unitTypeì„ ì¸ìë¡œ ë„˜ê²¨ì¤Œ)
             btn.onClick.AddListener(() => {
-                UnityEngine.Debug.Log("1. ½ºÆù ¹öÆ° Å¬¸¯µÊ!");
+                UnityEngine.Debug.Log($"[ë²„íŠ¼ í´ë¦­] {unitType} ìŠ¤í° ë²„íŠ¼ í´ë¦­ë¨!");
+
                 if (MultiplayerManager.Instance != null)
                 {
-                    UnityEngine.Debug.Log("2. ¸ÖÆ¼ÇÃ·¹ÀÌ¾î ¸Å´ÏÀú ÀÎ½ºÅÏ½º Á¸ÀçÇÔ!");
-                    MultiplayerManager.Instance.OnSpawnButtonClicked();
+                    // ìƒˆë¡œ ìˆ˜ì •í•œ MultiplayerManagerì˜ ì¸ì ìˆëŠ” í•¨ìˆ˜ë¥¼ í˜¸ì¶œí•©ë‹ˆë‹¤.
+                    MultiplayerManager.Instance.OnSpawnButtonClicked(unitType);
+                }
+                else
+                {
+                    UnityEngine.Debug.LogError("MultiplayerManager ì¸ìŠ¤í„´ìŠ¤ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!");
                 }
             });
         }
