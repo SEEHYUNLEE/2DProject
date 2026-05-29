@@ -155,9 +155,12 @@ MonoBehaviour:
   codeInput: {fileID: 870067018}
   displayCodeText: {fileID: 996966867}
   spawnWarriorButton: {fileID: 0}
+  spawnArcherButton: {fileID: 0}
+  spawnRandomButton: {fileID: 0}
   backToMenuButton: {fileID: 937725827}
+  warriorPrefab: {fileID: 2589431027673883169, guid: dcd0dd140bd0ee645967b20919e7b1b7, type: 3}
+  archerPrefab: {fileID: 2589431027673883169, guid: dcd0dd140bd0ee645967b20919e7b1b7, type: 3}
   maxPlayers: 2
-  unitPrefab: {fileID: 2589431027673883169, guid: dcd0dd140bd0ee645967b20919e7b1b7, type: 3}
   gameSceneName: GameScene
   teamASpawnPoint: {fileID: 0}
   teamBSpawnPoint: {fileID: 0}
