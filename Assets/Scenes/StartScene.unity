@@ -159,7 +159,7 @@ MonoBehaviour:
   spawnRandomButton: {fileID: 0}
   backToMenuButton: {fileID: 937725827}
   warriorPrefab: {fileID: 2589431027673883169, guid: dcd0dd140bd0ee645967b20919e7b1b7, type: 3}
-  archerPrefab: {fileID: 2589431027673883169, guid: dcd0dd140bd0ee645967b20919e7b1b7, type: 3}
+  archerPrefab: {fileID: 4814596869920855200, guid: f0c9f49c84acfcb41b6b90b980322ae6, type: 3}
   maxPlayers: 2
   gameSceneName: GameScene
   teamASpawnPoint: {fileID: 0}

@@ -3,7 +3,7 @@ using Unity.Netcode;
 
 public class Warrior : NetworkBehaviour
 {
-    public float moveSpeed = 4f;
+    public float moveSpeed = 2f;
     public int damage = 20;
     public float attackRange = 1.5f;
     public LayerMask unitLayer;
@@ -13,11 +13,11 @@ public class Warrior : NetworkBehaviour
     public NetworkVariable<int> teamIndex = new NetworkVariable<int>(0);
     public NetworkVariable<int> direction = new NetworkVariable<int>(1);
 
-    private bool isAttacking = false;
-    private bool isAttackingBase = false; // 🟢 기지 공격 모드 스위치
-    private Collider2D currentEnemy;
-    private Base targetBase;               // 🟢 공격 타겟 기지 컴포넌트 저장
-    private Animator anim;
+    protected bool isAttacking = false;
+    protected bool isAttackingBase = false; // 🟢 기지 공격 모드 스위치
+    protected Collider2D currentEnemy;
+    protected Base targetBase;               // 🟢 공격 타겟 기지 컴포넌트 저장
+    protected Animator anim;
 
     // 네트워크 상에 오브젝트가 생성되고 데이터가 준비되었을 때 호출
     public override void OnNetworkSpawn()
@@ -56,7 +56,7 @@ public class Warrior : NetworkBehaviour
             else
             {
                 // 기지가 살아있다면 유닛을 무시하고 무조건 기지 공격 애니메이션 실행
-                StartAttackClientRpc();
+                    StartAttackClientRpc();
                 isAttacking = true;
                 return;
             }
@@ -139,7 +139,7 @@ public class Warrior : NetworkBehaviour
     }
 
     [ClientRpc]
-    void StartAttackClientRpc()
+    protected void StartAttackClientRpc()
     {
         if (anim != null)
         {
@@ -187,12 +187,5 @@ public class Warrior : NetworkBehaviour
         {
             isAttacking = false;
         }
-    }
-
-    // 인스펙터 창에서 사거리를 보기 쉽게 시각화해주는 함수입니다. (선택사항)
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 }

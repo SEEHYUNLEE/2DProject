@@ -330,13 +330,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46a519ba6093a7c429eb6a7c368c0ab5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MultiplayerManager
+  mainMenuPanel: {fileID: 0}
+  lobbyPanel: {fileID: 0}
   hostButton: {fileID: 1863645068}
   clientButton: {fileID: 1282132615}
   codeInput: {fileID: 870067018}
   displayCodeText: {fileID: 996966867}
   spawnWarriorButton: {fileID: 637951838}
+  spawnArcherButton: {fileID: 0}
+  spawnRandomButton: {fileID: 0}
+  backToMenuButton: {fileID: 0}
+  warriorPrefab: {fileID: 0}
+  archerPrefab: {fileID: 0}
   maxPlayers: 2
-  unitPrefab: {fileID: 2589431027673883169, guid: dcd0dd140bd0ee645967b20919e7b1b7, type: 3}
+  gameSceneName: GameScene
   teamASpawnPoint: {fileID: 984531660}
   teamBSpawnPoint: {fileID: 1775919011}
 --- !u!4 &79709796
@@ -1088,7 +1095,7 @@ SpriteRenderer:
   m_Size: {x: 2, y: 2}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!4 &536861716
 Transform:
@@ -5649,7 +5656,7 @@ SpriteRenderer:
   m_Size: {x: 2, y: 2}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!4 &1314832062
 Transform:
