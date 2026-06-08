@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class UnitStats : NetworkBehaviour
 {
-    public int maxHp = 100;
+    public UnitType unitType;
+    public int maxHp;
 
     // 모든 클라이언트가 읽을 수 있고, 서버만 수정 가능한 네트워크 변수
     public NetworkVariable<int> currentHp = new NetworkVariable<int>(100,
@@ -12,12 +13,23 @@ public class UnitStats : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        // 서버에서 초기 체력 설정
         if (IsServer)
         {
+            if (unitType == UnitType.Warrior)
+            {
+                maxHp = 100;
+            }
+            else if (unitType == UnitType.Archer)
+            {
+                maxHp = 80;
+            }
+            else
+            {
+                maxHp = 50; // 기본값
+            }
+
             currentHp.Value = maxHp;
         }
-
         // 체력이 변경될 때 실행될 함수 등록 (UI 업데이트 등에 활용)
         currentHp.OnValueChanged += OnHpChanged;
     }

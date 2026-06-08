@@ -295,7 +295,7 @@ public class MultiplayerManager : MonoBehaviour
         // 2. [추가] 타입에 따른 프리팹 선택 (랜덤의 경우 서버에서 최종 결정된 유닛이 들어옴)
         GameObject prefabToSpawn = (type == UnitType.Archer) ? archerPrefab : warriorPrefab;
 
-        float yOffset = 0.1f;
+        float yOffset = (type == UnitType.Archer) ? 0.2f : 0.1f;
         Vector3 spawnPosition = new Vector3(selectedPoint.position.x, selectedPoint.position.y - yOffset, selectedPoint.position.z);
 
         // 선택된 프리팹으로 생성
