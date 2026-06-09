@@ -1,5 +1,12 @@
 fileFormatVersion: 2
 guid: c1796ce8a90214f58b9162c2f91d3ea0
+AssetOrigin:
+  serializedVersion: 1
+  productId: 352566
+  packageName: Tiny Swords
+  packageVersion: 1.0
+  assetPath: Assets/Tiny Swords/Units/Black Units/Warrior/Warrior_Attack1.png
+  uploadId: 844324
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -130,12 +137,12 @@ TextureImporter:
       name: Warrior_Attack1_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 192
-        height: 192
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 57
+        y: 55
+        width: 65
+        height: 90
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -152,12 +159,12 @@ TextureImporter:
       name: Warrior_Attack1_1
       rect:
         serializedVersion: 2
-        x: 192
-        y: 0
-        width: 192
-        height: 192
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 246
+        y: 55
+        width: 67
+        height: 93
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -174,12 +181,12 @@ TextureImporter:
       name: Warrior_Attack1_2
       rect:
         serializedVersion: 2
-        x: 384
-        y: 0
-        width: 192
-        height: 192
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 427
+        y: 39
+        width: 120
+        height: 104
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -196,12 +203,12 @@ TextureImporter:
       name: Warrior_Attack1_3
       rect:
         serializedVersion: 2
-        x: 576
-        y: 0
-        width: 192
-        height: 192
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 619
+        y: 49
+        width: 80
+        height: 88
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -210,6 +217,138 @@ TextureImporter:
       bones: []
       spriteID: b60dd105eff4cb420800000000000000
       internalID: 2647078634671427691
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Warrior_Attack1_4
+      rect:
+        serializedVersion: 2
+        x: 714
+        y: 117
+        width: 7
+        height: 7
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8dbbea36b75623146a7245c49c2e1cf0
+      internalID: 759287492
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Warrior_Attack1_5
+      rect:
+        serializedVersion: 2
+        x: 724
+        y: 94
+        width: 8
+        height: 18
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eb2c2beca4b13894fa30347c72a2cfa2
+      internalID: 145500560
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Warrior_Attack1_6
+      rect:
+        serializedVersion: 2
+        x: 722
+        y: 57
+        width: 11
+        height: 19
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 074d19b6f90ac124ab7b220a430a9706
+      internalID: 171152433
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Warrior_Attack1_7
+      rect:
+        serializedVersion: 2
+        x: 681
+        y: 40
+        width: 33
+        height: 10
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3a5462de6fd4e3a41a746f02f972456b
+      internalID: 1860631859
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Warrior_Attack1_8
+      rect:
+        serializedVersion: 2
+        x: 718
+        y: 50
+        width: 8
+        height: 6
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aad51dd93e578604e84ab1df7ccde34f
+      internalID: 137738272
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Warrior_Attack1_9
+      rect:
+        serializedVersion: 2
+        x: 639
+        y: 36
+        width: 30
+        height: 12
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cfbcdfe194685554eacfbd8d0ee01b07
+      internalID: 151755075
       vertices: []
       indices: 
       edges: []
@@ -228,21 +367,20 @@ TextureImporter:
     spriteCustomMetadata:
       entries:
       - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":3.0,"y":1.0},"gridSpriteSize":{"x":192.0,"y":192.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.0},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":7,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       Warrior_Attack1_0: -3464697531994304634
       Warrior_Attack1_1: 8738852634765236386
       Warrior_Attack1_2: 1435813858662126931
       Warrior_Attack1_3: 2647078634671427691
+      Warrior_Attack1_4: 759287492
+      Warrior_Attack1_5: 145500560
+      Warrior_Attack1_6: 171152433
+      Warrior_Attack1_7: 1860631859
+      Warrior_Attack1_8: 137738272
+      Warrior_Attack1_9: 151755075
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 352566
-  packageName: Tiny Swords
-  packageVersion: 1.0
-  assetPath: Assets/Tiny Swords/Units/Black Units/Warrior/Warrior_Attack1.png
-  uploadId: 844324
