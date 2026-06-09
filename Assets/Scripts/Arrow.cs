@@ -1,17 +1,46 @@
 ﻿using System;
 using Unity.Netcode;
 using UnityEngine;
+using System.Collections;
 
 public class Arrow : NetworkBehaviour
 {
     private Vector3 startPos;
     private Vector3 targetPos;
-    private int damage; // int로 변경 (보통 데미지는 정수)
-    private int shooterTeamIndex;
-    private float flightTime = 0.8f;
-    private float timer = 0f;
-    private float arcHeight = 3.0f;
-    [SerializeField] private float targetYOffset = 1.0f;
+    protected int damage; // int로 변경 (보통 데미지는 정수)
+    protected int shooterTeamIndex;
+    protected float flightTime = 0.8f;
+    protected float timer = 0f;
+    protected float arcHeight = 2.0f;
+    [SerializeField] protected float targetYOffset = 1.0f;
+
+    protected SpriteRenderer spriteRenderer;
+
+    void Start()
+    {
+        // 🟢 컴포넌트 가져오기
+        spriteRenderer = GetComponent<SpriteRenderer>();
+
+        // 🟢 생성 직후 투명하게 만들고 코루틴 시작
+        if (spriteRenderer != null)
+        {
+            StartCoroutine(FadeInEffect());
+        }
+    }
+
+    IEnumerator FadeInEffect()
+    {
+        // 잠시 투명하게 설정 (알파값 0)
+        Color color = spriteRenderer.color;
+        color.a = 0f;
+        spriteRenderer.color = color;
+
+        yield return new WaitForSeconds(0.15f);
+
+        // 다시 불투명하게 설정 (알파값 1)
+        color.a = 1f;
+        spriteRenderer.color = color;
+    }
 
     public void Setup(Transform target, int damage, int shooterTeamIndex)
     {
@@ -21,9 +50,15 @@ public class Arrow : NetworkBehaviour
 
         // 🟢 targetPos의 Y축에 targetYOffset을 더해 화살이 높게 날아가게 합니다.
         if (target != null)
+        {
             this.targetPos = target.position + new Vector3(0, targetYOffset, 0);
+        }
         else
-            this.targetPos = transform.position + transform.right;
+        {
+            Vector3 shootDirection = (shooterTeamIndex == 1) ? Vector3.right : Vector3.left;
+            // 타겟이 없으면 현재 화살이 바라보는 방향으로 멀리 날아가도록 설정
+            this.targetPos = transform.position + (shootDirection * 8.0f);
+        }
     }
 
     void Update()
@@ -34,14 +69,11 @@ public class Arrow : NetworkBehaviour
 
         timer += Time.deltaTime / flightTime;
 
-        // 1. 포물선 위치 계산
         Vector3 currentPos = Vector3.Lerp(startPos, targetPos, timer);
         float height = Mathf.Sin(timer * Mathf.PI) * arcHeight;
-        Vector3 newPos = currentPos + new Vector3(0, height, 0);
+        transform.position = currentPos + new Vector3(0, height, 0);
 
-        transform.position = newPos;
-
-        Vector3 moveDir = newPos - lastPos;
+        Vector3 moveDir = transform.position - lastPos;
         if (moveDir != Vector3.zero)
         {
             // 2D 게임 기준: Z축 회전 적용
@@ -49,40 +81,40 @@ public class Arrow : NetworkBehaviour
             transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
         }
 
-        var allUnits = FindObjectsByType<UnitStats>(FindObjectsSortMode.None);
-        foreach (var unit in allUnits)
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, 0.2f); // 범위는 적절히 조절
+        foreach (var hit in hitColliders)
         {
-            var warrior = unit.GetComponent<Warrior>();
-            if (warrior != null && warrior.teamIndex.Value != this.shooterTeamIndex)
+            var unit = hit.GetComponent<UnitStats>();
+            var w = hit.GetComponent<Warrior>();
+            if (unit != null && w.teamIndex.Value != shooterTeamIndex)
             {
-                float dist = Vector2.Distance(transform.position, unit.transform.position);
-                if (dist < 0.5f)
-                {
-                    unit.TakeDamage(damage);
-                    GetComponent<NetworkObject>().Despawn(true);
-                    return;
-                }
+                unit.TakeDamage(damage);
+                DespawnArrow(); // 🟢 적을 맞추면 즉시 사라짐
+                return; // 로직 종료
+            }
+
+            var b = hit.GetComponent<Base>();
+            if (b != null && b.teamIndex != shooterTeamIndex)
+            {
+                b.TakeDamage(damage);
+                DespawnArrow(); // 🟢 기지를 맞추면 즉시 사라짐
+                return;
             }
         }
 
-        var allBases = FindObjectsByType<Base>(FindObjectsSortMode.None);
-        foreach (var b in allBases)
+        // 3. [도착 판정] - 끝까지 날아갔을 때
+        if (timer >= 1.0f)
         {
-            // 내 팀의 기지가 아니면 데미지
-            if (b.teamIndex != this.shooterTeamIndex)
-            {
-                if (Vector2.Distance(transform.position, b.transform.position) < 1.5f) // 기지는 크니까 반경을 좀 더 크게
-                {
-                    b.TakeDamage(damage); // 기지 데미지 함수
-                    GetComponent<NetworkObject>().Despawn(true);
-                    return;
-                }
-            }
+            DespawnArrow();
         }
+    }
 
-        if (timer >= 1.5f)
+    private void DespawnArrow()
+    {
+        var netObj = GetComponent<NetworkObject>();
+        if (netObj != null && netObj.IsSpawned)
         {
-            GetComponent<NetworkObject>().Despawn(true);
+            netObj.Despawn(true);
         }
     }
 }

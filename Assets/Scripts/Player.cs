@@ -8,7 +8,10 @@ public enum UnitType
 {
     Warrior,
     Archer,
-    Random
+    Random,
+    GreatWarrior,
+    GreatArcher,
+    Dragon
 }
 
 public class Player : NetworkBehaviour
@@ -54,7 +57,7 @@ public class Player : NetworkBehaviour
 
             if (SceneManager.GetActiveScene().name == "GameScene")
             {
-                coin.Value += 50; // 1초에 50G씩 증가
+                coin.Value += 2000; // 1초에 50G씩 증가
             }
         }
     }
@@ -137,7 +140,7 @@ public class Player : NetworkBehaviour
             UnitType finalSpawnType = type;
             if (type == UnitType.Random)
             {
-                finalSpawnType = (UnityEngine.Random.Range(0, 2) == 0) ? UnitType.Warrior : UnitType.Archer;
+                finalSpawnType = (UnityEngine.Random.Range(0, 2) == 0) ? UnitType.GreatWarrior : UnitType.GreatArcher;
             }
 
             MultiplayerManager.Instance.SpawnUnit(rpcParams.Receive.SenderClientId, finalSpawnType);

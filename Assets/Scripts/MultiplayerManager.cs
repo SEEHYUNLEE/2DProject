@@ -30,6 +30,8 @@ public class MultiplayerManager : MonoBehaviour
 
     [SerializeField] GameObject warriorPrefab;  // 기존 unitPrefab의 이름을 알아보기 쉽게 변경 권장
     [SerializeField] GameObject archerPrefab;
+    [SerializeField] GameObject greatwarriorPrefab;
+    [SerializeField] GameObject greatarcherPrefab;
 
     [SerializeField] int maxPlayers = 2; // 최대 인원 설정
     [SerializeField] string gameSceneName = "GameScene";
@@ -293,13 +295,34 @@ public class MultiplayerManager : MonoBehaviour
         Transform selectedPoint = (team == 1) ? teamASpawnPoint : teamBSpawnPoint;
 
         // 2. [추가] 타입에 따른 프리팹 선택 (랜덤의 경우 서버에서 최종 결정된 유닛이 들어옴)
-        GameObject prefabToSpawn = (type == UnitType.Archer) ? archerPrefab : warriorPrefab;
+        GameObject prefabToSpawn = type switch
+        {
+            UnitType.Warrior => warriorPrefab,
+            UnitType.Archer => archerPrefab,
+            UnitType.GreatWarrior => greatwarriorPrefab,
+            UnitType.GreatArcher => greatarcherPrefab,
+            _ => warriorPrefab // 정의되지 않은 경우 기본값
+        };
 
-        float yOffset = (type == UnitType.Archer) ? 0.2f : 0.1f;
+        float yOffset = type switch
+        {
+            UnitType.Warrior => 0.1f,
+            UnitType.Archer => 0.2f,
+            UnitType.GreatWarrior => 0.3f, // 원하는 값으로 수정하세요
+            UnitType.GreatArcher => 0.15f, // 원하는 값으로 수정하세요
+            _ => 0.1f  // 기본값 (default)
+        };
         Vector3 spawnPosition = new Vector3(selectedPoint.position.x, selectedPoint.position.y - yOffset, selectedPoint.position.z);
 
         // 선택된 프리팹으로 생성
         GameObject unit = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
+
+        Vector3 originalScale = unit.transform.localScale;
+        unit.transform.localScale = new Vector3(
+            Mathf.Abs(originalScale.x) * moveDir,
+            originalScale.y,
+            originalScale.z
+        );
 
         var networkObj = unit.GetComponent<NetworkObject>();
         if (networkObj != null)

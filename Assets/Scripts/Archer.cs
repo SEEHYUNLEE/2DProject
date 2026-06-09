@@ -8,25 +8,20 @@ public class Archer : Warrior
 
     void Awake() { attackRange = 8.0f; }
 
-    // 🟢 애니메이션 이벤트가 호출할 함수
     public new void DealDamage()
     {
         if (!IsServer) return;
 
-        // 궁수 본인이 죽었는지 확인
-        var stats = GetComponent<UnitStats>();
-        if (stats != null && stats.currentHp.Value <= 0) return;
-
-        // 타겟 결정
+        // 1. 타겟 결정 (null일 수 있음)
         Transform attackTarget = isAttackingBase ? (targetBase != null ? targetBase.transform : null)
-                                               : (currentEnemy != null ? currentEnemy.transform : null);
+                                                : (currentEnemy != null ? currentEnemy.transform : null);
 
-        // 타겟이 살아있는지 확인 후 발사
-        if (attackTarget != null && attackTarget.GetComponent<NetworkObject>() != null)
-        {
-            GameObject arrowObj = Instantiate(arrowPrefab, shootPoint.position, Quaternion.identity);
-            arrowObj.GetComponent<NetworkObject>().Spawn();
-            arrowObj.GetComponent<Arrow>().Setup(attackTarget, damage, this.teamIndex.Value);
-        }
+        // 2. 화살 생성 (타겟 유무와 상관없이 발사)
+        GameObject arrowObj = Instantiate(arrowPrefab, shootPoint.position, shootPoint.rotation);
+        arrowObj.GetComponent<NetworkObject>().Spawn();
+
+        // 3. Arrow 컴포넌트에 타겟 전달
+        // Arrow 내부에서 null 체크를 통해 타겟이 없으면 직진하도록 처리합니다.
+        arrowObj.GetComponent<Arrow>().Setup(attackTarget, damage, this.teamIndex.Value);
     }
 }

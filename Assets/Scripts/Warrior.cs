@@ -22,14 +22,6 @@ public class Warrior : NetworkBehaviour
     // 네트워크 상에 오브젝트가 생성되고 데이터가 준비되었을 때 호출
     public override void OnNetworkSpawn()
     {
-        Vector3 prefabScale = transform.localScale;
-
-        transform.localScale = new Vector3(
-            Mathf.Abs(prefabScale.x) * direction.Value,
-            prefabScale.y,
-            prefabScale.z
-        );
-
         anim = GetComponent<Animator>();
     }
 
