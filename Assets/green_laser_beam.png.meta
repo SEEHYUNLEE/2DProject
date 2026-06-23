@@ -1,0 +1,492 @@
+fileFormatVersion: 2
+guid: 13ec307aa8c901e47b52933ae5d8f3db
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 3140406418066342056
+    second: green_laser_beam_0
+  - first:
+      213: -7115216967592720276
+    second: green_laser_beam_1
+  - first:
+      213: -7977715015093748230
+    second: green_laser_beam_2
+  - first:
+      213: -802045646142529303
+    second: green_laser_beam_3
+  - first:
+      213: -8209867800562433431
+    second: green_laser_beam_4
+  - first:
+      213: 2924978855004024644
+    second: green_laser_beam_5
+  - first:
+      213: -4831937924370518942
+    second: green_laser_beam_6
+  - first:
+      213: 147792181510680749
+    second: green_laser_beam_7
+  - first:
+      213: 1670380897714400371
+    second: green_laser_beam_8
+  - first:
+      213: 5100464643761076508
+    second: green_laser_beam_9
+  - first:
+      213: -6549428288423139123
+    second: green_laser_beam_10
+  - first:
+      213: -5325827384385066022
+    second: green_laser_beam_11
+  - first:
+      213: 3497468112423871616
+    second: green_laser_beam_12
+  - first:
+      213: 4151054966448195334
+    second: green_laser_beam_13
+  - first:
+      213: 4985520782598175564
+    second: green_laser_beam_14
+  - first:
+      213: -6494532831008731599
+    second: green_laser_beam_15
+  - first:
+      213: 7047845149805507148
+    second: green_laser_beam_16
+  - first:
+      213: -4705960600908421101
+    second: green_laser_beam_17
+  - first:
+      213: 5517652663388169741
+    second: green_laser_beam_18
+  - first:
+      213: 3077602119505244896
+    second: green_laser_beam_19
+  - first:
+      213: 106643898582847709
+    second: green_laser_beam_20
+  - first:
+      213: -6762799121301204921
+    second: green_laser_beam_21
+  - first:
+      213: 3200663654927317024
+    second: green_laser_beam_22
+  - first:
+      213: 1763652265056561016
+    second: green_laser_beam_23
+  - first:
+      213: -9088651292236266187
+    second: green_laser_beam_24
+  - first:
+      213: -7554660962005190201
+    second: green_laser_beam_25
+  - first:
+      213: -6010261309997319647
+    second: green_laser_beam_26
+  - first:
+      213: -6129294149329985093
+    second: green_laser_beam_27
+  - first:
+      213: 1781713624071715613
+    second: green_laser_beam_28
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 16384
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: green_laser_beam_0
+      rect:
+        serializedVersion: 2
+        x: 36
+        y: 615
+        width: 471
+        height: 174
+      alignment: 4
+      pivot: {x: 0, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a08337aff6f49b20800000000000000
+      internalID: 3140406418066342056
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: green_laser_beam_1
+      rect:
+        serializedVersion: 2
+        x: 531
+        y: 602
+        width: 467
+        height: 203
+      alignment: 4
+      pivot: {x: 0, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 44290ded3bf247d40b5956c1b97268d3
+      internalID: -7115216967592720276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: green_laser_beam_2
+      rect:
+        serializedVersion: 2
+        x: 1028
+        y: 599
+        width: 461
+        height: 206
+      alignment: 4
+      pivot: {x: 0, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5c615a03e55926e46a5039660a175a72
+      internalID: -7977715015093748230
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: green_laser_beam_3
+      rect:
+        serializedVersion: 2
+        x: 1535
+        y: 600
+        width: 450
+        height: 205
+      alignment: 4
+      pivot: {x: 0, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d17a3735d56595a40b984fae28e446d7
+      internalID: -802045646142529303
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: green_laser_beam_4
+      rect:
+        serializedVersion: 2
+        x: 2038
+        y: 593
+        width: 442
+        height: 219
+      alignment: 4
+      pivot: {x: 0, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 50544c4667bfcdd4d85ce48fc01736e1
+      internalID: -8209867800562433431
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: green_laser_beam_5
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 309
+        width: 453
+        height: 230
+      alignment: 4
+      pivot: {x: 0, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7716606e0c3233b44aa42e050d7e9ffc
+      internalID: 2924978855004024644
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: green_laser_beam_6
+      rect:
+        serializedVersion: 2
+        x: 550
+        y: 311
+        width: 458
+        height: 227
+      alignment: 4
+      pivot: {x: 0, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b0ff3c35f6f835f4a90a5325a7afc298
+      internalID: -4831937924370518942
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: green_laser_beam_7
+      rect:
+        serializedVersion: 2
+        x: 1058
+        y: 311
+        width: 444
+        height: 218
+      alignment: 4
+      pivot: {x: 0, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dcb0307ba4c995f41ad28e1fc0f13d0e
+      internalID: 147792181510680749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: green_laser_beam_8
+      rect:
+        serializedVersion: 2
+        x: 1535
+        y: 309
+        width: 461
+        height: 225
+      alignment: 4
+      pivot: {x: 0, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 949d1e4878967234e92a5cdfedb8733a
+      internalID: 1670380897714400371
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: green_laser_beam_9
+      rect:
+        serializedVersion: 2
+        x: 2048
+        y: 328
+        width: 432
+        height: 188
+      alignment: 4
+      pivot: {x: 0, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d99994e6ba4f071419d8ac2e8431e73c
+      internalID: 5100464643761076508
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: green_laser_beam_10
+      rect:
+        serializedVersion: 2
+        x: 60
+        y: 59
+        width: 446
+        height: 194
+      alignment: 4
+      pivot: {x: 0, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b36fd054e3d4b574b93e2efd45680492
+      internalID: -6549428288423139123
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: green_laser_beam_11
+      rect:
+        serializedVersion: 2
+        x: 564
+        y: 54
+        width: 437
+        height: 196
+      alignment: 4
+      pivot: {x: 0, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: be3cd8dcd2f5e2247a82c710b9572e91
+      internalID: -5325827384385066022
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: fcffe1ad52020904aad342a7517ec19c
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.0,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":4,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      green_laser_beam_0: 3140406418066342056
+      green_laser_beam_1: -7115216967592720276
+      green_laser_beam_10: -6549428288423139123
+      green_laser_beam_11: -5325827384385066022
+      green_laser_beam_12: 589329800
+      green_laser_beam_13: -1097265887
+      green_laser_beam_15: -476476752
+      green_laser_beam_16: 1454739964
+      green_laser_beam_18: -878179779
+      green_laser_beam_19: 1244535931
+      green_laser_beam_2: -7977715015093748230
+      green_laser_beam_20: 187828265
+      green_laser_beam_21: -827077377
+      green_laser_beam_22: 1184028290
+      green_laser_beam_23: -1385449548
+      green_laser_beam_3: -802045646142529303
+      green_laser_beam_4: -8209867800562433431
+      green_laser_beam_5: 2924978855004024644
+      green_laser_beam_6: -4831937924370518942
+      green_laser_beam_7: 147792181510680749
+      green_laser_beam_8: 1670380897714400371
+      green_laser_beam_9: 5100464643761076508
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

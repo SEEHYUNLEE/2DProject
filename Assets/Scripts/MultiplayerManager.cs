@@ -32,6 +32,7 @@ public class MultiplayerManager : MonoBehaviour
     [SerializeField] GameObject archerPrefab;
     [SerializeField] GameObject greatwarriorPrefab;
     [SerializeField] GameObject greatarcherPrefab;
+    [SerializeField] GameObject alienPrefab;
 
     [SerializeField] int maxPlayers = 2; // 최대 인원 설정
     [SerializeField] string gameSceneName = "GameScene";
@@ -301,6 +302,7 @@ public class MultiplayerManager : MonoBehaviour
             UnitType.Archer => archerPrefab,
             UnitType.GreatWarrior => greatwarriorPrefab,
             UnitType.GreatArcher => greatarcherPrefab,
+            UnitType.Alien => alienPrefab,
             _ => warriorPrefab // 정의되지 않은 경우 기본값
         };
 
@@ -337,6 +339,13 @@ public class MultiplayerManager : MonoBehaviour
         {
             warrior.teamIndex.Value = team;
             warrior.direction.Value = (int)moveDir;
+        }
+
+        var alien = unit.GetComponent<Alien>();
+        if (alien != null)
+        {
+            alien.teamIndex.Value = team;
+            alien.direction.Value = (int)moveDir;
         }
     }
 
