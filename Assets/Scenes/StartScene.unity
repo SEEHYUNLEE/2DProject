@@ -162,6 +162,7 @@ MonoBehaviour:
   archerPrefab: {fileID: 4814596869920855200, guid: f0c9f49c84acfcb41b6b90b980322ae6, type: 3}
   greatwarriorPrefab: {fileID: 2486079297094436320, guid: aa2170969057c7c48a555d0210beee48, type: 3}
   greatarcherPrefab: {fileID: 4358921826095911365, guid: 36a1ed118b954fb40a72121a3ab0c132, type: 3}
+  alienPrefab: {fileID: 3214544202229713686, guid: bc15df7ab5d6b584d963560ba6e995ad, type: 3}
   maxPlayers: 2
   gameSceneName: GameScene
   teamASpawnPoint: {fileID: 0}

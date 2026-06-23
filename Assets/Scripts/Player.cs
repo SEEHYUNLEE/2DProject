@@ -11,7 +11,7 @@ public enum UnitType
     Random,
     GreatWarrior,
     GreatArcher,
-    Dragon
+    Alien
 }
 
 public class Player : NetworkBehaviour
@@ -140,7 +140,7 @@ public class Player : NetworkBehaviour
             UnitType finalSpawnType = type;
             if (type == UnitType.Random)
             {
-                finalSpawnType = (UnityEngine.Random.Range(0, 2) == 0) ? UnitType.GreatWarrior : UnitType.GreatArcher;
+                finalSpawnType = (UnityEngine.Random.Range(0, 2) == 0) ? UnitType.Alien : UnitType.Alien;
             }
 
             MultiplayerManager.Instance.SpawnUnit(rpcParams.Receive.SenderClientId, finalSpawnType);
