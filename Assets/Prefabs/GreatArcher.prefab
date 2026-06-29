@@ -335,9 +335,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitStats
   ShowTopMostFoldoutHeaderGroup: 1
   unitType: 4
-  maxHp: 0
+  maxHp: 160
   currentHp:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
-    m_InternalValue: 100
+    m_InternalValue: 160

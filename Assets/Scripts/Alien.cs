@@ -101,6 +101,7 @@ public class Alien : NetworkBehaviour
 
     IEnumerator Attack()
     {
+        yield return new WaitForSeconds(1.0f);
         while (true)
         {
             Base[] bases = FindObjectsByType<Base>(FindObjectsSortMode.None);

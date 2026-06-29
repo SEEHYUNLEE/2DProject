@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
@@ -9,10 +11,10 @@ using Unity.Services.Core;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using System.Collections;
 
-public class MultiplayerManager : MonoBehaviour
+public class MultiplayerManager : NetworkBehaviour
 {
     public static MultiplayerManager Instance;
 
@@ -27,12 +29,18 @@ public class MultiplayerManager : MonoBehaviour
     [SerializeField] Button spawnArcherButton;
     [SerializeField] Button spawnRandomButton;
     [SerializeField] Button backToMenuButton;
+    [SerializeField] Button backToHomeButton;
 
     [SerializeField] GameObject warriorPrefab;  // 기존 unitPrefab의 이름을 알아보기 쉽게 변경 권장
     [SerializeField] GameObject archerPrefab;
     [SerializeField] GameObject greatwarriorPrefab;
     [SerializeField] GameObject greatarcherPrefab;
     [SerializeField] GameObject alienPrefab;
+
+    [SerializeField] GameObject BlueWins;
+    [SerializeField] GameObject RedWins;
+    [SerializeField] GameObject GameUi;
+    [SerializeField] GameObject MenuUi;
 
     [SerializeField] int maxPlayers = 2; // 최대 인원 설정
     [SerializeField] string gameSceneName = "GameScene";
@@ -65,29 +73,81 @@ public class MultiplayerManager : MonoBehaviour
 
     void Start()
     {
-        hostButton.onClick.AddListener(CreateRoom);
-        clientButton.onClick.AddListener(JoinRoom);
-
-        //spawnWarriorButton.onClick.AddListener(OnSpawnButtonClicked);
-
-        backToMenuButton.onClick.AddListener(LeaveLobby);
-
-        if (spawnWarriorButton != null) spawnWarriorButton.onClick.AddListener(() => OnSpawnButtonClicked(UnitType.Warrior));
-        if (spawnArcherButton != null) spawnArcherButton.onClick.AddListener(() => OnSpawnButtonClicked(UnitType.Archer));
-        if (spawnRandomButton != null) spawnRandomButton.onClick.AddListener(() => OnSpawnButtonClicked(UnitType.Random));
-
-        if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
-        if (lobbyPanel != null) lobbyPanel.SetActive(false);
-
         if (NetworkManager.Singleton != null)
         {
             NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
             NetworkManager.Singleton.OnClientDisconnectCallback += OnDisconnect;
+            NetworkManager.Singleton.OnClientDisconnectCallback += OnServerClientDisconnect; // 추가
         }
     }
 
-    private void OnDestroy()
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        // 씬별 UI 상태 초기화
+        if (scene.name == "StartScene")
+        {
+            // 시간축 복구 (다시 메뉴로 돌아가기 전 초기화)
+            Time.timeScale = 1f;
+
+            mainMenuPanel = GameObject.Find("MainMenu");
+            lobbyPanel = GameObject.Find("Lobby");
+
+            GameObject inputObj = GameObject.Find("CodeInputField");
+            if (inputObj != null)
+            {
+                codeInput = inputObj.GetComponent<TMP_InputField>();
+            }
+
+            GameObject codeTextObj = GameObject.Find("DisplayCodeText");
+            if (codeTextObj != null)
+            {
+                displayCodeText = codeTextObj.GetComponent<TMP_Text>();
+            }
+
+            GameObject hostBtnObj = GameObject.Find("HostButton");
+            if (hostBtnObj != null) hostBtnObj.GetComponent<Button>().onClick.AddListener(CreateRoom);
+
+            GameObject clientBtnObj = GameObject.Find("ClientButton");
+            if (clientBtnObj != null) clientBtnObj.GetComponent<Button>().onClick.AddListener(JoinRoom);
+
+            GameObject backBtnObj = GameObject.Find("BackToMenuButton");
+            if (backBtnObj != null) backBtnObj.GetComponent<Button>().onClick.AddListener(LeaveLobby);
+
+
+            if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
+            if (lobbyPanel != null) lobbyPanel.SetActive(false);
+        }
+        else if (scene.name == gameSceneName)
+        {
+            isGameOver = false;
+
+            GameObject homeBtnObj = GameObject.Find("HomeButton");
+            if (homeBtnObj != null) homeBtnObj.GetComponent<Button>().onClick.AddListener(OnHomeButtonClicked);
+
+            BlueWins = GameObject.Find("BlueWins");
+            RedWins = GameObject.Find("RedWins");
+            GameUi = GameObject.Find("GameUi");
+            MenuUi = GameObject.Find("MenuUi");
+
+            if (BlueWins != null) BlueWins.SetActive(false);
+            if (RedWins != null) RedWins.SetActive(false);
+            if (GameUi != null) GameUi.SetActive(true);
+            if (MenuUi != null) MenuUi.SetActive(true);
+
+            GameObject spawnPointA = GameObject.Find("SpawnPointA");
+            GameObject spawnPointB = GameObject.Find("SpawnPointB");
+            if (spawnPointA != null) teamASpawnPoint = spawnPointA.transform;
+            if (spawnPointB != null) teamBSpawnPoint = spawnPointB.transform;
+
+            /*if (spawnWarriorButton != null) spawnWarriorButton.onClick.AddListener(() => OnSpawnButtonClicked(UnitType.Warrior));
+            if (spawnArcherButton != null) spawnArcherButton.onClick.AddListener(() => OnSpawnButtonClicked(UnitType.Archer));
+            if (spawnRandomButton != null) spawnRandomButton.onClick.AddListener(() => OnSpawnButtonClicked(UnitType.Random));*/
+        }
+    }
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
         // 메모리 누수 방지를 위한 이벤트 해제
         if (NetworkManager.Singleton != null)
         {
@@ -176,6 +236,14 @@ public class MultiplayerManager : MonoBehaviour
     {
         try
         {
+            // 1. 혹시나 이전 연결 정보가 남아있다면 정리 (매우 중요)
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
+            {
+                NetworkManager.Singleton.Shutdown();
+                // Shutdown은 비동기 작업일 수 있으므로 아주 잠깐 대기
+                await Task.Delay(500);
+            }
+
             // 릴레이 서버 할당 (2인용)
             Allocation alloc = await RelayService.Instance.CreateAllocationAsync(maxPlayers - 1);
             string joinCode = await RelayService.Instance.GetJoinCodeAsync(alloc.AllocationId);
@@ -186,6 +254,7 @@ public class MultiplayerManager : MonoBehaviour
             var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
             transport.SetRelayServerData(AllocationUtils.ToRelayServerData(alloc, "dtls"));
 
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
 
             NetworkManager.Singleton.StartHost();
@@ -215,6 +284,8 @@ public class MultiplayerManager : MonoBehaviour
             // 호스트가 Shutdown하면 방이 터지고, 클라이언트가 하면 본인만 연결이 끊깁니다.
             NetworkManager.Singleton.Shutdown();
         }
+
+        //CleanUpNetwork();
 
         if (lobbyPanel != null) lobbyPanel.SetActive(false);
         if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
@@ -282,15 +353,6 @@ public class MultiplayerManager : MonoBehaviour
     {
         if (!NetworkManager.Singleton.IsServer) return;
 
-        // 1. 팀 및 방향 설정 (기존 코드 유지)
-        if (teamASpawnPoint == null || teamBSpawnPoint == null)
-        {
-            GameObject spawnPointA = GameObject.Find("SpawnPointA");
-            GameObject spawnPointB = GameObject.Find("SpawnPointB");
-            if (spawnPointA != null) teamASpawnPoint = spawnPointA.transform;
-            if (spawnPointB != null) teamBSpawnPoint = spawnPointB.transform;
-        }
-
         int team = (clientId == 0) ? 1 : 2;
         float moveDir = (team == 1) ? 1f : -1f;
         Transform selectedPoint = (team == 1) ? teamASpawnPoint : teamBSpawnPoint;
@@ -349,6 +411,47 @@ public class MultiplayerManager : MonoBehaviour
         }
     }
 
+    public void OnHomeButtonClicked()
+    {     
+        if (NetworkManager.Singleton.IsServer)
+        {
+            // 호스트는 이 함수를 통해 모든 클라이언트에게 씬 전환 명령을 내립니다.
+            // 그리고 씬 전환이 일어난 후 안전하게 서버를 닫습니다.
+            StartCoroutine(ShutdownSequence());
+        }
+        else if (NetworkManager.Singleton.IsClient)
+        {
+            RequestReturnToMenuServerRpc();
+        }
+        //CleanUpNetwork();
+    }
+
+    private IEnumerator ShutdownSequence()
+    {
+        // 1. 모든 클라이언트에게 씬 전환 명령 (서버가 호출하면 모든 클라이언트가 강제 이동함)
+        NetworkManager.Singleton.SceneManager.LoadScene("StartScene", LoadSceneMode.Single);
+
+        // 2. 잠시 대기 (클라이언트들이 씬 전환 명령을 받을 시간 확보)
+        yield return new WaitForSeconds(0.5f);
+
+        // 3. 서버 종료
+        NetworkManager.Singleton.Shutdown();
+    }
+
+    // 서버(호스트)에서 감지하는 이탈 로직
+    private void OnServerClientDisconnect(ulong clientId)
+    {
+        if (NetworkManager.Singleton.IsServer)
+        {
+            // 서버가 아직 게임 씬에 있다면
+            if (SceneManager.GetActiveScene().name == gameSceneName)
+            {
+                // 나머지 클라이언트들을 쫓아내고 서버를 종료합니다.
+                StartCoroutine(ShutdownSequence());
+            }
+        }
+    }
+
     public void OnBaseDestroyed(int failedTeamIndex)
     {
         if (!NetworkManager.Singleton.IsServer) return;
@@ -371,12 +474,51 @@ public class MultiplayerManager : MonoBehaviour
         // 1. 유니티 물리 및 시간축 정지 (이동, 애니메이션 등 일시정지)
         Time.timeScale = 0f;
 
-        // 2. UI 텍스트나 알림창을 띄우고 싶다면 여기에 작성하세요.
-        if (displayCodeText != null)
+        if (winnerTeam == 1)
         {
-            displayCodeText.text = $"GAME OVER\nWinner: Team {winnerTeam}";
+            if (BlueWins != null) BlueWins.SetActive(true);
+        }
+        else
+        {
+            if (RedWins != null) RedWins.SetActive(true);
         }
 
-        UnityEngine.Debug.Log($"[클라이언트] 게임 정지 완료. 승리팀: {winnerTeam}");
+        if (GameUi != null) GameUi.SetActive(false);
+        if (MenuUi != null) MenuUi.SetActive(false);
+
+        StartCoroutine(ReturnToMenuAfterDelay(5f));
+    }
+
+    private IEnumerator ReturnToMenuAfterDelay(float delay)
+    {
+        // 실제 시간(Time.timeScale = 0)과 상관없이 대기하려면 unscaledTime을 사용해야 합니다.
+        // Time.timeScale이 0이면 yield return new WaitForSeconds(5)는 영원히 끝나지 않기 때문입니다.
+
+        float start = Time.unscaledTime;
+        while (Time.unscaledTime - start < delay)
+        {
+            yield return null;
+        }
+
+        OnHomeButtonClicked();
+    }
+
+    private void OnEnable()
+    {
+        // 씬 로드 이벤트 구독 (이 스크립트가 활성화될 때)
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        // 씬 로드 이벤트 구독 해제 (메모리 누수 방지, 필수!)
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void RequestReturnToMenuServerRpc()
+    {
+        // 서버가 모든 클라이언트에게 씬 전환 명령을 내립니다.
+        StartCoroutine(ShutdownSequence());
     }
 }

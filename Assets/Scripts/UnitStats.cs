@@ -23,6 +23,14 @@ public class UnitStats : NetworkBehaviour
             {
                 maxHp = 80;
             }
+            else if (unitType == UnitType.GreatWarrior)
+            {
+                maxHp = 250;
+            }
+            else if (unitType == UnitType.GreatArcher)
+            {
+                maxHp = 160;
+            }
             else
             {
                 maxHp = 50; // ±âº»°ª

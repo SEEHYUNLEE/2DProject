@@ -1,92 +1,84 @@
-using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class CameraController : MonoBehaviour
 {
-    public float moveSpeed = 10f;
-    public float edgeSize = 20f;
-
+    public float dragSpeed = 0.02f; // 드래그 감도
     public BoxCollider2D mapCollider;
 
-    float minX, maxX;
+    private float minX, maxX;
+    private Camera cam;
 
-    Camera cam;
-
-    private Vector2 lastTouchPos;
+    private Vector2 lastInputPos;
+    private bool isDragging = false;
 
     void Start()
     {
         cam = Camera.main;
 
-        // 맵 경계 가져오기 (월드 좌표)
+        // 맵 경계 가져오기
         minX = mapCollider.bounds.min.x;
         maxX = mapCollider.bounds.max.x;
-
-
-        UnityEngine.Debug.Log("minX: " + minX + " maxX: " + maxX);
     }
 
     void Update()
     {
-#if UNITY_EDITOR || UNITY_STANDALONE
-        HandleMouse();
-#else
-        HandleTouch();
-#endif
+        HandleInput();
         ClampPosition();
     }
 
-    void HandleMouse()
+    void HandleInput()
     {
-        Vector2 mousePos = Mouse.current.position.ReadValue();
-        Vector3 pos = transform.position;
+        // 마우스 또는 터치 입력을 통합적으로 가져옴
+        bool isPressed = false;
+        bool wasPressed = false;
+        Vector2 currentPos = Vector2.zero;
 
-        if (mousePos.x >= Screen.width - edgeSize)
+        // 터치 우선 확인
+        if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.isPressed)
         {
-            pos.x += moveSpeed * Time.deltaTime;
+            isPressed = true;
+            wasPressed = Touchscreen.current.primaryTouch.press.wasPressedThisFrame;
+            currentPos = Touchscreen.current.primaryTouch.position.ReadValue();
         }
-        else if (mousePos.x <= edgeSize)
+        // 터치가 없으면 마우스 확인
+        else if (Mouse.current != null && Mouse.current.leftButton.isPressed)
         {
-            pos.x -= moveSpeed * Time.deltaTime;
+            isPressed = true;
+            wasPressed = Mouse.current.leftButton.wasPressedThisFrame;
+            currentPos = Mouse.current.position.ReadValue();
         }
 
-        transform.position = pos;
-    }
-
-    void HandleTouch()
-    {
-        if (Touchscreen.current.primaryTouch.press.isPressed)
+        // 입력 처리
+        if (wasPressed)
         {
-            Vector2 touchPos = Touchscreen.current.primaryTouch.position.ReadValue();
+            lastInputPos = currentPos;
+            isDragging = true;
+        }
+        else if (isPressed && isDragging)
+        {
+            Vector2 delta = currentPos - lastInputPos;
 
-            if (Touchscreen.current.primaryTouch.press.wasPressedThisFrame)
-            {
-                lastTouchPos = touchPos;
-            }
-            else
-            {
-                Vector2 delta = touchPos - lastTouchPos;
-                transform.Translate(-delta.x * 0.01f, 0, 0);
-                lastTouchPos = touchPos;
-            }
+            // 드래그 방향과 반대로 이동 (카메라가 손을 따라감)
+            transform.Translate(-delta.x * dragSpeed, 0, 0);
+
+            lastInputPos = currentPos;
+        }
+        else
+        {
+            isDragging = false;
         }
     }
 
     void ClampPosition()
     {
         Vector3 pos = transform.position;
-
-        // 카메라 반 너비 계산
         float camHalfWidth = cam.orthographicSize * cam.aspect;
 
-        // 카메라 끝이 경계에 닿도록 제한
         float leftLimit = minX + camHalfWidth;
         float rightLimit = maxX - camHalfWidth;
 
         pos.x = Mathf.Clamp(pos.x, leftLimit, rightLimit);
-
         transform.position = pos;
     }
-
 }
