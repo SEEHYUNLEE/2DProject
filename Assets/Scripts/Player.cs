@@ -140,7 +140,13 @@ public class Player : NetworkBehaviour
             UnitType finalSpawnType = type;
             if (type == UnitType.Random)
             {
-                finalSpawnType = (UnityEngine.Random.Range(0, 2) == 0) ? UnitType.Alien : UnitType.Alien;
+                int rand = UnityEngine.Random.Range(0, 100); // 0 ~ 99
+
+                if (rand < 30) finalSpawnType = UnitType.Warrior;
+                else if (rand < 60) finalSpawnType = UnitType.Archer;
+                else if (rand < 75) finalSpawnType = UnitType.GreatWarrior;
+                else if (rand < 90) finalSpawnType = UnitType.GreatArcher;
+                else finalSpawnType = UnitType.Alien;
             }
 
             MultiplayerManager.Instance.SpawnUnit(rpcParams.Receive.SenderClientId, finalSpawnType);
