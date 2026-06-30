@@ -19,10 +19,15 @@ public class Warrior : NetworkBehaviour
     protected Base targetBase;               // 🟢 공격 타겟 기지 컴포넌트 저장
     protected Animator anim;
 
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip attackSound;
+    [SerializeField] protected float attackVolume = 0.5f;
+
     // 네트워크 상에 오브젝트가 생성되고 데이터가 준비되었을 때 호출
     public override void OnNetworkSpawn()
     {
         anim = GetComponent<Animator>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -149,10 +154,22 @@ public class Warrior : NetworkBehaviour
         }
     }
 
+    [ClientRpc]
+    protected void PlayAttackSoundClientRpc()
+    {
+        if (audioSource != null && attackSound != null)
+        {
+            audioSource.volume = attackVolume;
+            audioSource.PlayOneShot(attackSound);
+        }
+    }
+
     // 👉 애니메이션 이벤트(타격 시점)에서 서버가 호출
     public void DealDamage()
     {
         if (!IsServer) return;
+
+        PlayAttackSoundClientRpc();
 
         // 🟢 기지를 때리는 중이라면 기지에 데미지 전달
         if (isAttackingBase && targetBase != null)

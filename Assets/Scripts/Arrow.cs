@@ -16,6 +16,8 @@ public class Arrow : NetworkBehaviour
 
     protected SpriteRenderer spriteRenderer;
 
+    [SerializeField] private AudioClip hitSound;
+
     void Start()
     {
         // 🟢 컴포넌트 가져오기
@@ -103,7 +105,7 @@ public class Arrow : NetworkBehaviour
         }
 
         // 3. [도착 판정] - 끝까지 날아갔을 때
-        if (timer >= 1.0f)
+        if (timer >= 1.2f)
         {
             DespawnArrow();
         }
@@ -111,10 +113,23 @@ public class Arrow : NetworkBehaviour
 
     private void DespawnArrow()
     {
+        PlayHitSoundClientRpc(transform.position);
+
         var netObj = GetComponent<NetworkObject>();
         if (netObj != null && netObj.IsSpawned)
         {
             netObj.Despawn(true);
+        }
+    }
+
+    [ClientRpc]
+    private void PlayHitSoundClientRpc(Vector3 position)
+    {
+        if (hitSound != null)
+        {
+            Vector3 adjustedPosition = new Vector3(position.x, position.y, -10f);
+            //화살이 있던 위치에서 z축은 카메라로 소리 재생
+            AudioSource.PlayClipAtPoint(hitSound, adjustedPosition);
         }
     }
 }
