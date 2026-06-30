@@ -373,7 +373,7 @@ public class MultiplayerManager : NetworkBehaviour
             UnitType.Warrior => 0.1f,
             UnitType.Archer => 0.2f,
             UnitType.GreatWarrior => 0.3f, // 원하는 값으로 수정하세요
-            UnitType.GreatArcher => 0.15f, // 원하는 값으로 수정하세요
+            UnitType.GreatArcher => 0.3f, // 원하는 값으로 수정하세요
             _ => 0.1f  // 기본값 (default)
         };
         Vector3 spawnPosition = new Vector3(selectedPoint.position.x, selectedPoint.position.y - yOffset, selectedPoint.position.z);
@@ -482,10 +482,9 @@ public class MultiplayerManager : NetworkBehaviour
         {
             if (RedWins != null) RedWins.SetActive(true);
         }
-
         if (GameUi != null) GameUi.SetActive(false);
         if (MenuUi != null) MenuUi.SetActive(false);
-
+        
         StartCoroutine(ReturnToMenuAfterDelay(5f));
     }
 

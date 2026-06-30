@@ -14,9 +14,12 @@ public class Base : NetworkBehaviour
 
     [Header("UI 세팅")]
     [SerializeField] private Slider hpSlider; // 에디터에서 기지의 Slider를 드래그 앤 드롭 하세요.
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip hitSound;
 
     public override void OnNetworkSpawn()
     {
+        audioSource = GetComponent<AudioSource>();
         // 서버가 처음 켜질 때 최대 체력으로 초기화
         if (IsServer)
         {
@@ -42,6 +45,8 @@ public class Base : NetworkBehaviour
 
         currentHp.Value = Mathf.Max(0, currentHp.Value - damage);
 
+        PlayHitSoundClientRpc();
+
         if (currentHp.Value <= 0)
         {
             // 🟢 내 기지가 터졌음을 매니저에게 제보 (teamIndex: 1 또는 2)
@@ -62,6 +67,15 @@ public class Base : NetworkBehaviour
         if (hpSlider != null)
         {
             hpSlider.value = (float)hp / maxHp; // 0 ~ 1 사이 비율로 변환
+        }
+    }
+
+    [ClientRpc]
+    private void PlayHitSoundClientRpc()
+    {
+        if (audioSource != null && hitSound != null)
+        {
+            audioSource.PlayOneShot(hitSound);
         }
     }
 }

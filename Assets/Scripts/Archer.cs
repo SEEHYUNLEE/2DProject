@@ -6,7 +6,11 @@ public class Archer : Warrior
     public GameObject arrowPrefab;
     public Transform shootPoint;
 
-    void Awake() { attackRange = 8.0f; }
+    void Awake()
+    {
+        attackRange = 8.0f;
+        attackVolume = 1.0f;
+    }
 
     public new void DealDamage()
     {
@@ -15,6 +19,8 @@ public class Archer : Warrior
         // 1. 타겟 결정 (null일 수 있음)
         Transform attackTarget = isAttackingBase ? (targetBase != null ? targetBase.transform : null)
                                                 : (currentEnemy != null ? currentEnemy.transform : null);
+
+        PlayAttackSoundClientRpc();
 
         // 2. 화살 생성 (타겟 유무와 상관없이 발사)
         GameObject arrowObj = Instantiate(arrowPrefab, shootPoint.position, shootPoint.rotation);

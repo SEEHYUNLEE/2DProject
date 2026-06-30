@@ -208,6 +208,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Arrow
   ShowTopMostFoldoutHeaderGroup: 1
   targetYOffset: 1
+  hitSound: {fileID: 8300000, guid: 155827172c42d524b856238bfd41dc2e, type: 3}
 --- !u!61 &8766930163292640131
 BoxCollider2D:
   m_ObjectHideFlags: 0
