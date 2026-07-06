@@ -20,10 +20,9 @@ public class Arrow : NetworkBehaviour
 
     void Start()
     {
-        // 🟢 컴포넌트 가져오기
         spriteRenderer = GetComponent<SpriteRenderer>();
 
-        // 🟢 생성 직후 투명하게 만들고 코루틴 시작
+        // 생성 직후 투명하게 만들기
         if (spriteRenderer != null)
         {
             StartCoroutine(FadeInEffect());
@@ -32,14 +31,12 @@ public class Arrow : NetworkBehaviour
 
     IEnumerator FadeInEffect()
     {
-        // 잠시 투명하게 설정 (알파값 0)
         Color color = spriteRenderer.color;
         color.a = 0f;
         spriteRenderer.color = color;
 
         yield return new WaitForSeconds(0.15f);
 
-        // 다시 불투명하게 설정 (알파값 1)
         color.a = 1f;
         spriteRenderer.color = color;
     }
@@ -50,7 +47,7 @@ public class Arrow : NetworkBehaviour
         this.shooterTeamIndex = shooterTeamIndex;
         this.startPos = transform.position;
 
-        // 🟢 targetPos의 Y축에 targetYOffset을 더해 화살이 높게 날아가게 합니다.
+        // targetPos의 Y축에 targetYOffset을 더해 화살이 높게 날아가게 합니다.
         if (target != null)
         {
             this.targetPos = target.position + new Vector3(0, targetYOffset, 0);
@@ -58,7 +55,7 @@ public class Arrow : NetworkBehaviour
         else
         {
             Vector3 shootDirection = (shooterTeamIndex == 1) ? Vector3.right : Vector3.left;
-            // 타겟이 없으면 현재 화살이 바라보는 방향으로 멀리 날아가도록 설정
+            // 타겟이 사라지면 현재 화살이 가던 방향으로 날아가도록 설정
             this.targetPos = transform.position + (shootDirection * 8.0f);
         }
     }
@@ -91,21 +88,21 @@ public class Arrow : NetworkBehaviour
             if (unit != null && w.teamIndex.Value != shooterTeamIndex)
             {
                 unit.TakeDamage(damage);
-                DespawnArrow(); // 🟢 적을 맞추면 즉시 사라짐
-                return; // 로직 종료
+                DespawnArrow();
+                return;
             }
 
             var b = hit.GetComponent<Base>();
             if (b != null && b.teamIndex != shooterTeamIndex)
             {
                 b.TakeDamage(damage);
-                DespawnArrow(); // 🟢 기지를 맞추면 즉시 사라짐
+                DespawnArrow();
                 return;
             }
         }
 
-        // 3. [도착 판정] - 끝까지 날아갔을 때
-        if (timer >= 1.2f)
+        // 끝까지 날아갔을 때보다 조금 더
+        if (timer >= 1.1f)
         {
             DespawnArrow();
         }
@@ -127,8 +124,8 @@ public class Arrow : NetworkBehaviour
     {
         if (hitSound != null)
         {
+            // 화살이 있던 위치에서 z축을 카메라 z축으로 움직인 후 소리 재생
             Vector3 adjustedPosition = new Vector3(position.x, position.y, -10f);
-            //화살이 있던 위치에서 z축은 카메라로 소리 재생
             AudioSource.PlayClipAtPoint(hitSound, adjustedPosition);
         }
     }

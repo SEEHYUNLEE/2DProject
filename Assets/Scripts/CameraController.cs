@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 
 public class CameraController : MonoBehaviour
 {
-    public float dragSpeed = 0.02f; // 드래그 감도
+    public float dragSpeed = 0.02f;
     public BoxCollider2D mapCollider;
 
     private float minX, maxX;
@@ -29,7 +29,7 @@ public class CameraController : MonoBehaviour
 
     void HandleInput()
     {
-        // 마우스 또는 터치 입력을 통합적으로 가져옴
+        // 마우스, 터치 입력을 통합적으로 가져옴
         bool isPressed = false;
         bool wasPressed = false;
         Vector2 currentPos = Vector2.zero;
@@ -41,7 +41,6 @@ public class CameraController : MonoBehaviour
             wasPressed = Touchscreen.current.primaryTouch.press.wasPressedThisFrame;
             currentPos = Touchscreen.current.primaryTouch.position.ReadValue();
         }
-        // 터치가 없으면 마우스 확인
         else if (Mouse.current != null && Mouse.current.leftButton.isPressed)
         {
             isPressed = true;
@@ -49,7 +48,6 @@ public class CameraController : MonoBehaviour
             currentPos = Mouse.current.position.ReadValue();
         }
 
-        // 입력 처리
         if (wasPressed)
         {
             lastInputPos = currentPos;
@@ -59,7 +57,7 @@ public class CameraController : MonoBehaviour
         {
             Vector2 delta = currentPos - lastInputPos;
 
-            // 드래그 방향과 반대로 이동 (카메라가 손을 따라감)
+            // 드래그 방향과 반대로 이동
             transform.Translate(-delta.x * dragSpeed, 0, 0);
 
             lastInputPos = currentPos;
