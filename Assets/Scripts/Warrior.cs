@@ -39,12 +39,10 @@ public class Warrior : NetworkBehaviour
         if (isAttacking) return;
 
         // -------------------------------------------------------------
-        // 🔥 [기지 공격 판단 우선순위 1위] 
-        // 한 번 기지 공격 모드가 활성화되면 주변 유닛 탐지를 아예 생략하고 기지만 타겟팅합니다.
+        // 기지 공격 모드가 활성화되면 주변 유닛 탐지를 생략하고 기지만 타겟팅
         // -------------------------------------------------------------
         if (isAttackingBase && targetBase != null)
         {
-            // 혹시 기지가 이미 파괴되었다면 모드 해제
             if (targetBase.currentHp.Value <= 0)
             {
                 isAttackingBase = false;
@@ -52,30 +50,30 @@ public class Warrior : NetworkBehaviour
             }
             else
             {
-                // 기지가 살아있다면 유닛을 무시하고 무조건 기지 공격 애니메이션 실행
-                    StartAttackClientRpc();
-                isAttacking = true;
-                return;
-            }
-        }
-
-        // 🟢 1-1. 내 진행 방향 바로 앞에 '상대방 기지'가 사거리 내에 있는지 먼저 검사합니다.
-        Collider2D baseTarget = Physics2D.OverlapCircle(transform.position, attackRange, baseLayer);
-        if (baseTarget != null)
-        {
-            Base detectedBase = baseTarget.GetComponent<Base>();
-            // 상대 기지가 맞는지 팀 인덱스로 확인
-            if (detectedBase != null && detectedBase.teamIndex != this.teamIndex.Value)
-            {
-                targetBase = detectedBase;
-                isAttackingBase = true; // 기지 공격 상태 돌입 (유닛 무시 모드 켜짐)
+                // 기지가 살아있다면 유닛을 무시
                 StartAttackClientRpc();
                 isAttacking = true;
                 return;
             }
         }
 
-        // 2. 주변 유닛 탐지 (공격 범위 내) -> 기존 코드 유지
+        // 내 앞에 상대방 기지가 사거리 내에 있는지 검사
+        Collider2D baseTarget = Physics2D.OverlapCircle(transform.position, attackRange, baseLayer);
+        if (baseTarget != null)
+        {
+            Base detectedBase = baseTarget.GetComponent<Base>();
+            // 팀 인덱스로 확인
+            if (detectedBase != null && detectedBase.teamIndex != this.teamIndex.Value)
+            {
+                targetBase = detectedBase;
+                isAttackingBase = true; // 기지 공격 상태
+                StartAttackClientRpc();
+                isAttacking = true;
+                return;
+            }
+        }
+
+        // 주변 유닛 탐지
         Collider2D[] targets = Physics2D.OverlapCircleAll(transform.position, attackRange, unitLayer);
 
         bool shouldStop = false;
@@ -87,7 +85,7 @@ public class Warrior : NetworkBehaviour
             Warrior targetWarrior = target.GetComponent<Warrior>();
             if (targetWarrior == null) continue;
 
-            // A. 적군을 발견한 경우
+            // 적군 발견
             if (targetWarrior.teamIndex.Value != this.teamIndex.Value)
             {
                 currentEnemy = target;
@@ -96,7 +94,7 @@ public class Warrior : NetworkBehaviour
                 return;
             }
 
-            // B. 아군이 바로 앞에 있는 경우 (길막 방지)
+            // 아군이 바로 앞에 있는 경우 (길막 방지)
             else if (targetWarrior.teamIndex.Value == this.teamIndex.Value)
             {
                 float relativePosX = target.transform.position.x - transform.position.x;
@@ -164,21 +162,19 @@ public class Warrior : NetworkBehaviour
         }
     }
 
-    // 👉 애니메이션 이벤트(타격 시점)에서 서버가 호출
+    // 애니메이션 이벤트 넣어서 실행
     public void DealDamage()
     {
         if (!IsServer) return;
 
         PlayAttackSoundClientRpc();
 
-        // 🟢 기지를 때리는 중이라면 기지에 데미지 전달
         if (isAttackingBase && targetBase != null)
         {
             targetBase.TakeDamage(damage);
             return;
         }
 
-        // 일반 유닛을 때리는 중이라면 유닛에 데미지 전달 (기존 코드)
         if (currentEnemy != null)
         {
             var stats = currentEnemy.GetComponent<UnitStats>();
@@ -189,7 +185,6 @@ public class Warrior : NetworkBehaviour
         }
     }
 
-    // 👉 애니메이션 이벤트(끝 시점)에서 서버가 호출
     public void EndAttack()
     {
         if (IsServer)

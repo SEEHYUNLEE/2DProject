@@ -19,7 +19,6 @@ public class MuteButton : MonoBehaviour
 
     private void ApplyMuteState()
     {
-        // AudioListener.pause를 true로 하면 게임 내 모든 소리가 즉시 멈춥니다.
         AudioListener.pause = isMuted;
 
         // 버튼 색상 변경
